@@ -127,5 +127,6 @@ for objectIdx in np.unique(BordersImg):
 hfigure = plt.figure(9)
 hfigure.canvas.set_window_title('9. Box image')
 plt.imshow(crop_img)
+plt.show()
 # change crop img to something that has not been marked, no red lines
 
