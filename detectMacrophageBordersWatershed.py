@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
-
+import imutils
 
 # 1. Get image
 image_path = "macrophage_testimg.png"
@@ -98,18 +98,34 @@ crop_img = PaddedImage[a:b, c:d]
 hfigure = plt.figure(8)
 hfigure.canvas.set_window_title('8. Finale image')
 plt.imshow(crop_img, cmap='gray')
-plt.show()
 
-index = np.where(final==-1)
-listOfIndices= list(zip(index[0], index[1]))
-for indice in listOfIndices:
-    print(indice)
+# Remove padding
+BordersImg = final[a:b, c:d]
 
-# what happens here in git when i add this?
-# edit after additon of new branch
-# 112356
-# not sure..
-# Making changes here
-# New Editing branch
-# Just added note file as well
+# For ref go to https://www.pyimagesearch.com/2015/11/02/watershed-opencv/
+for objectIdx in np.unique(BordersImg):
+    if objectIdx in (1, -1):  # background equals 1
+        continue
+    # Allocate memory and draw the shape into mask
+    mask = np.zeros(shape = (BordersImg.shape), dtype="uint8")
+    mask[BordersImg == objectIdx] = 255
+    mask = np.uint8(mask)
+    cuntrs = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cuntrs = imutils.grab_contours(cuntrs)
+    c = max(cuntrs, key=cv2.contourArea)    # contour area calculates the contour area.
+    # Documentation for min bounding rectangles available at
+    # https://docs.opencv.org/3.4/dd/d49/tutorial_py_contour_features.html
+    rect = cv2.minAreaRect(c)
+    box = cv2.boxPoints(rect)
+    cv2.drawContours(crop_img, [box.astype(int)], 0, (255, 255, 255), 3)
+    # cv2.putText(crop_img, "#{}".format(objectIdx), (int(x) - 10, int(y)),
+    #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+# index = np.where(BordersImg==-1)
+# listOfIndices = list(zip(index[0], index[1]))
+# for indice in listOfIndices:
+#     print(indice)
+hfigure = plt.figure(9)
+hfigure.canvas.set_window_title('9. Box image')
+plt.imshow(crop_img)
+# change crop img to something that has not been marked, no red lines
 
