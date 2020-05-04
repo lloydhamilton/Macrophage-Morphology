@@ -149,3 +149,7 @@ plt.show()
 # change crop img to something that has not been marked, no red lines
 #Extract image to individual boxes and classify them
 
+# clean up code before proceeding. Create a class with appropriate methods that gives you the data.
+# Methods to include:
+# 1. Plot/show graphs
+# Create GUI to quickly sort data, ramified vs ameoboid
