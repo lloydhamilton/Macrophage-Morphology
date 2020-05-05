@@ -1,8 +1,7 @@
 class detectMacrophages:
 
-    def __init__(self, img_file, showImageData):
+    def __init__(self, img_file):
         self.img_file = img_file
-        self.showImageData = showImageData
 
     def showImages(self, data, figureNumber, title, *argument):
 
@@ -11,11 +10,11 @@ class detectMacrophages:
         hfigure = plt.figure(figureNumber)
         hfigure.canvas.set_window_title(title)
         if len(argument) == 1:
-            plt.imshow(data, cmap=argument)
+            plt.imshow(data, cmap=argument[0])
         else:
             plt.imshow(data)
 
-    def segmentImage (self):
+    def segmentImage(self, showImageData):
 
         import numpy as np
         import cv2
@@ -23,12 +22,11 @@ class detectMacrophages:
         import matplotlib.image as mpimg
         import imutils
 
+        showImageData = bool(showImageData)
+
         # 1. Get image
         image_path = self.img_file
         Original_img = np.uint8(mpimg.imread(image_path))
-        hfigure = plt.figure(1)
-        plt.imshow(Original_img, cmap='gray')
-        hfigure.canvas.set_window_title('1.Original_img')
 
         # 2. Convert to BRG format manually, use this function if image is binary.
         NewImage = np.uint8(np.empty(shape=(1000, 1000, 3)))
@@ -109,6 +107,13 @@ class detectMacrophages:
             cv2.putText(PaddedImage, "#{}".format(objectIdx - 2), (int(x) - 10, int(y)),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 1)
 
-            if self.showImageData == 1:
+        if showImageData:
+            self.showImages(Original_img, 1, '1. Original_img', 'gray')
+            self.showImages(sure_bg, 2, '2.Sure Background', 'gray')
+            self.showImages(sure_fg, 3, '3.Sure Foreground', 'gray')
+            self.showImages(unknown, 4, '4.Unknown', 'gray')
+            self.showImages(markers1, 5, '5.Markers + 1', 'gray')
+            self.showImages(PaddedImage, 6, '6.SegmentedImage', 'gray')
+            plt.show()
 
-                continue
+        return extracted_data
