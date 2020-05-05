@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 import matplotlib.image as mpimg
-
+import imutils
 
 # 1. Get image
 image_path = "macrophage_testimg.png"
@@ -90,26 +90,66 @@ hfigure.canvas.set_window_title('7. Padded Final image')
 plt.imshow(PaddedImage, cmap='gray')
 
 # 12. Crop and remove padding of image, leave 1% of padding
-a = int(0.009*NewImage.shape[0])
-b = int((PaddedImage.shape[0]) - (0.009*NewImage.shape[0]))
-c = int(0.009*NewImage.shape[1])
-d = int((PaddedImage.shape[1]) - (0.009*NewImage.shape[1]))
-crop_img = PaddedImage[a:b, c:d]
-hfigure = plt.figure(8)
-hfigure.canvas.set_window_title('8. Finale image')
-plt.imshow(crop_img, cmap='gray')
+# a = int(0.009*NewImage.shape[0])
+# b = int((PaddedImage.shape[0]) - (0.009*NewImage.shape[0]))
+# c = int(0.009*NewImage.shape[1])
+# d = int((PaddedImage.shape[1]) - (0.009*NewImage.shape[1]))
+# crop_img = PaddedImage[a:b, c:d]
+# hfigure = plt.figure(8)
+# hfigure.canvas.set_window_title('8. Finale image')
+# plt.imshow(crop_img, cmap='gray')
+#
+# # Remove padding
+# BordersImg = final[a:b, c:d]
+
+# Create array to append extracted data shape=(1000, 1000, 3))
+extracted_data = []
+
+# Create a copy of paddedimage as boundingbox data keep appearing in extracted data.
+# copyofPaddedImage = np.empty(shape = (PaddedImage.shape), dtype="uint8")
+# copyofPaddedImage[:,:,0] = PaddedImage[:,:,0]
+# copyofPaddedImage[:,:,1] = PaddedImage[:,:,1]
+# copyofPaddedImage[:,:,2] = PaddedImage[:,:,2]
+
+# Padded_Image = cv2.copyMakeBorder(NewImage, top, bottom, left, right, cv2.BORDER_CONSTANT, None, 0)
+
+# For ref go to https://www.pyimagesearch.com/2015/11/02/watershed-opencv/
+for objectIdx in np.unique(final):
+    if objectIdx in (1, -1):  # background equals 1
+        continue
+    # Allocate memory and draw the shape into mask
+    mask = np.zeros(shape = (final.shape), dtype="uint8")
+    mask[final == objectIdx] = 255
+    mask = np.uint8(mask)
+    cuntrs = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cuntrs = imutils.grab_contours(cuntrs)
+    c = max(cuntrs, key=cv2.contourArea)    # contour area calculates the contour area.
+    # Documentation for min bounding rectangles available at
+    # https://docs.opencv.org/3.4/dd/d49/tutorial_py_contour_features.html
+    x, y, w, h = cv2.boundingRect(c)
+    ROI = mask[y-5:y + h + 5, x-5:x + w+5]
+    extracted_data.append(ROI)
+    cv2.rectangle(PaddedImage, (x, y), (x + w, y + h), (255, 255, 255), 1) # weird behaviour here. If this code is executed, ROI changes to also included bounding box even when executed after the data had been appended to list, to solve this you have to create a copy of the array.
+    cv2.putText(PaddedImage, "#{}".format(objectIdx-2), (int(x) - 10, int(y)),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 1)
+    # rect = cv2.minAreaRect(c)
+    # box = cv2.boxPoints(rect)
+    # cv2.drawContours(crop_img, [box.astype(int)], 0, (255, 255, 255), 1)
+    # cv2.putText(crop_img, "#{}".format(objectIdx), (int(x) - 10, int(y)),
+    #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+# index = np.where(BordersImg==-1)
+# listOfIndices = list(zip(index[0], index[1]))
+# for indice in listOfIndices:
+#     print(indice)
+hfigure = plt.figure(9)
+hfigure.canvas.set_window_title('9. Bounding Box image')
+plt.imshow(PaddedImage)
 plt.show()
 
-index = np.where(final==-1)
-listOfIndices= list(zip(index[0], index[1]))
-for indice in listOfIndices:
-    print(indice)
+# change crop img to something that has not been marked, no red lines
+#Extract image to individual boxes and classify them
 
-# what happens here in git when i add this?
-# edit after additon of new branch
-# 112356
-# not sure..
-# Making changes here
-# New Editing branch
-# Just added note file as well
-
+# clean up code before proceeding. Create a class with appropriate methods that gives you the data.
+# Methods to include:
+# 1. Plot/show graphs
+# Create GUI to quickly sort data, ramified vs ameoboid
