@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 import numpy as np
 from tkinter import messagebox
 # classInstance = Dm.detectMacrophages('testImage2.png')
-# segmented = classInstance.segmentImage(0)
+# segmented = classInstance.segmentImage(1)
 
 # Save data variable
 # with open('SegmentedImages', 'wb') as f:
@@ -20,6 +20,7 @@ from tkinter import messagebox
 
 with open('SegmentedImages', 'rb') as f:
     segmentedImages = pickle.load(f)
+
 logical_list = np.ones(shape=(200, 1), dtype=bool)
 image_number = 0
 
