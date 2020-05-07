@@ -132,6 +132,7 @@ class detectMacrophages:
         def Cycle_Image():
 
             nonlocal image_number
+            nonlocal extracted_data
 
             if image_number == len(extracted_data) - 1:
                 self.messagebox.showinfo("Finished", "Classification complete")
@@ -139,13 +140,15 @@ class detectMacrophages:
                 return
 
             image_number += 1
-            arrayImage = self.Image.fromarray(extracted_data[image_number])
-            resizedImage = arrayImage.resize((200, 200))
-            img = self.ImageTk.PhotoImage(image=resizedImage)
-            self.canvas_image.itemconfig(self.imageoncanvas, image=img)
+            nextarrayimage = self.Image.fromarray(extracted_data[image_number])
+            nextresizedimage = nextarrayimage.resize((200, 200))
+            photo = self.ImageTk.PhotoImage(image=nextresizedimage)
+            # keep reference of image to disable work around garbage collector,
+            # https://stackoverflow.com/questions/43783857/image-not-showing-in-tkinter-window
+            photo.image = photo
+            canvas_image.itemconfig(imageoncanvas, image=photo)
             # canvas.create_image(0, 0, anchor=self.Tk.NW, image=img)
             label.config(text=str((image_number + 1)) + '/' + str(len(extracted_data)))
-            root.mainloop()
 
         def Transition_Macrophages():
 
@@ -184,12 +187,11 @@ class detectMacrophages:
                 root.destroy()
 
         root = self.Tk.Tk()
+        canvas_image = self.Tk.Canvas(root, width=200, height=200)
         arrayImage = self.Image.fromarray(extracted_data[image_number])
         resizedImage = arrayImage.resize((200, 200))
         img = self.ImageTk.PhotoImage(image=resizedImage)
-
-        self.canvas_image = self.Tk.Canvas(root, width=200, height=200)
-        self.imageoncanvas = self.canvas_image.create_image(0, 0, anchor=self.Tk.NW, image=img)
+        imageoncanvas = canvas_image.create_image(0, 0, anchor=self.Tk.NW, image=img)
 
         fr_buttons = self.Tk.Frame(root)
         btn_ramified = self.Tk.Button(fr_buttons, text="Ramified", command=Ramified_Macrophage)
@@ -197,7 +199,7 @@ class detectMacrophages:
         btn_inbetween = self.Tk.Button(fr_buttons, text='In Between', command=Transition_Macrophages)
         label = self.Tk.Label(master=fr_buttons, text=str((image_number + 1)) + '/' + str(len(extracted_data)))
 
-        self.canvas_image.grid(row=0, column=0, rowspan=4, columnspan=3)
+        canvas_image.grid(row=0, column=0, rowspan=4, columnspan=3)
         fr_buttons.grid(row=4, column=1, sticky="ns")
         btn_ramified.grid(sticky="ew", padx=5, pady=5)
         btn_inbetween.grid(sticky="ew", padx=5, pady=5)
@@ -206,3 +208,32 @@ class detectMacrophages:
         root.protocol("WM_DELETE_WINDOW", on_closing)
         root.mainloop()
         return logical_list
+
+
+if __name__ == '__main__':
+
+    from ID_Macrophages import class_detectMacrophages as Dm
+    import pickle
+    import os
+
+    classInstance = Dm.detectMacrophages('testImage2.png')
+    segmented = classInstance.segmentImage(0)
+    final_logical = classInstance.manual_classification(segmented)
+
+    # Save data variable
+    path = os.getcwd()
+    savepath = path + '\\Data1'
+    os.mkdir(savepath)
+
+    with open((savepath + '\\TrainingLogical1'), 'wb') as f:
+        pickle.dump(final_logical, f)
+
+    with open(savepath + '\\TrainingData1', 'wb') as f:
+        pickle.dump(segmented, f)
+
+    # with open('Manual Classification Data', 'rb') as f:
+    #     final_logical = pickle.load(f)
+    # with open('Manual Classification Image Data', 'rb') as f:
+    #     imagedata = pickle.load(f)
+
+    print(final_logical)

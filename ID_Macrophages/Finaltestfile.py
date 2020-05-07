@@ -15,7 +15,7 @@ os.mkdir(savepath)
 with open((savepath + '\\TrainingLogical1'), 'wb') as f:
     pickle.dump(final_logical, f)
 
-with open(savepath + '\\TrainingLogical1', 'wb') as f:
+with open(savepath + '\\TrainingData1', 'wb') as f:
     pickle.dump(segmented, f)
 
 # with open('Manual Classification Data', 'rb') as f:
