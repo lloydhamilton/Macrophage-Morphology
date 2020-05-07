@@ -5,7 +5,6 @@ class detectMacrophages:
     from matplotlib import pyplot as plt
     import matplotlib.image as mpimg
     import imutils
-    import pickle
     import tkinter as Tk
     from PIL import Image, ImageTk
     from tkinter import messagebox
@@ -124,56 +123,86 @@ class detectMacrophages:
 
     def manual_classification(self, extracted_data):
 
-        logical_list = self.np.ones(shape=(200, 1), dtype=bool)
+        # Uncomment the line below to work with smaller dataset.
+        # extracted_data = extracted_data[0:5]
+
+        logical_list = self.np.ones(shape=(len(extracted_data), 3), dtype=bool)
         image_number = 0
+
+        def Cycle_Image():
+
+            nonlocal image_number
+
+            if image_number == len(extracted_data) - 1:
+                self.messagebox.showinfo("Finished", "Classification complete")
+                root.destroy()
+                return
+
+            image_number += 1
+            arrayImage = self.Image.fromarray(extracted_data[image_number])
+            resizedImage = arrayImage.resize((200, 200))
+            img = self.ImageTk.PhotoImage(image=resizedImage)
+            self.canvas_image.itemconfig(self.imageoncanvas, image=img)
+            # canvas.create_image(0, 0, anchor=self.Tk.NW, image=img)
+            label.config(text=str((image_number + 1)) + '/' + str(len(extracted_data)))
+            root.mainloop()
+
+        def Transition_Macrophages():
+
+            # Transition mac logical is defined in column 1
+            nonlocal logical_list
+            nonlocal image_number
+            logical_list[image_number, 0] = False
+            logical_list[image_number, 1] = True
+            logical_list[image_number, 2] = False
+            Cycle_Image()
 
         def Ramified_Macrophage():
 
+            # Ramified mac logical is defined in column 0
+
             nonlocal logical_list
             nonlocal image_number
-            logical_list[image_number] = True
-            image_number += 1
-            arrayImage = self.Image.fromarray(extracted_data[image_number])
-            resizedImage = arrayImage.resize((200, 200))
-            img = self.ImageTk.PhotoImage(image=resizedImage)
-            canvas.create_image(0, 0, anchor=self.Tk.NW, image=img)
-            root.mainloop()
+            logical_list[image_number, 0] = True
+            logical_list[image_number, 1] = False
+            logical_list[image_number, 2] = False
+            Cycle_Image()
 
         def Amoeboid_Macrophage():
 
+            # Amoeboid mac is defined in column 2
+
             nonlocal logical_list
             nonlocal image_number
-            image_number
-            logical_list
-            logical_list[image_number] = False
-            image_number += 1
-            arrayImage = self.Image.fromarray(extracted_data[image_number])
-            resizedImage = arrayImage.resize((200, 200))
-            img = self.ImageTk.PhotoImage(image=resizedImage)
-            canvas.create_image(0, 0, anchor=self.Tk.NW, image=img)
-            root.mainloop()
+            logical_list[image_number, 0] = False
+            logical_list[image_number, 1] = False
+            logical_list[image_number, 2] = True
+            Cycle_Image()
 
         def on_closing():
             if self.messagebox.askokcancel("Quit", "Do you want to quit?"):
                 root.destroy()
-
 
         root = self.Tk.Tk()
         arrayImage = self.Image.fromarray(extracted_data[image_number])
         resizedImage = arrayImage.resize((200, 200))
         img = self.ImageTk.PhotoImage(image=resizedImage)
 
-        canvas = self.Tk.Canvas(root, width=200, height=200)
-        canvas.create_image(0, 0, anchor=self.Tk.NW, image=img)
+        self.canvas_image = self.Tk.Canvas(root, width=200, height=200)
+        self.imageoncanvas = self.canvas_image.create_image(0, 0, anchor=self.Tk.NW, image=img)
 
         fr_buttons = self.Tk.Frame(root)
         btn_ramified = self.Tk.Button(fr_buttons, text="Ramified", command=Ramified_Macrophage)
         btn_amoeboid = self.Tk.Button(fr_buttons, text="Amoeboid", command=Amoeboid_Macrophage)
+        btn_inbetween = self.Tk.Button(fr_buttons, text='In Between', command=Transition_Macrophages)
+        label = self.Tk.Label(master=fr_buttons, text=str((image_number + 1)) + '/' + str(len(extracted_data)))
 
-        canvas.grid(row=0, column=0, rowspan=4, columnspan=3)
+        self.canvas_image.grid(row=0, column=0, rowspan=4, columnspan=3)
         fr_buttons.grid(row=4, column=1, sticky="ns")
         btn_ramified.grid(sticky="ew", padx=5, pady=5)
+        btn_inbetween.grid(sticky="ew", padx=5, pady=5)
         btn_amoeboid.grid(sticky="ew", padx=5, pady=5)
+        label.grid(sticky="ew", padx=5, pady=5)
         root.protocol("WM_DELETE_WINDOW", on_closing)
         root.mainloop()
         return logical_list
