@@ -18,3 +18,5 @@ x_test /= 255
 # Instead, we want each label to be an array with on element set to 1 and and the rest set to 0.
 y_train = keras.utils.to_categorical(y_train, 10)
 y_test = keras.utils.to_categorical(y_test, 10)
+
+#This is a test message
