@@ -216,10 +216,10 @@ if __name__ == '__main__':
     import pickle
     import os
 
-    file_directory = 'D:\Docs\Python Scripts\Macrophage-Morphology\To Classify\Tile2.png'
+    file_directory = 'D:\Docs\Python Scripts\Macrophage-Morphology\To Classify\Tile5.png'
     file_name = file_directory.split('\\')[len(file_directory.split('\\'))-1]
     classInstance = Dm.detectMacrophages(file_directory)
-    segmented = classInstance.segmentImage(0)
+    segmented = classInstance.segmentImage(1)
     final_logical = classInstance.manual_classification(segmented)
 
     # Save data variable
