@@ -5,7 +5,7 @@ Macrophages play a vital role in mediating immune responses against pathogens an
 ![bin_img](brainsci-10-00159-g001.png)
 **Figure 1.** Morphological features of ramified and amoeboid macrophage. [Image adapted from [Rawlinson et al, 2020](https://www.mdpi.com/2076-3425/10/3/159/htm)] 
 
-## Project Demostration
+## Project Demonstration
 
 This project requires an input of a binarise image for image processing as shown (Figure 2).
 
